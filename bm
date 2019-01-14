@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple tool script to run a TnexBlog
+# Simple tool script to run the TnexBlog
 # Made by Tnex himself.
 
 dir="$(pwd)"
@@ -30,6 +30,7 @@ newpost() {
 	sed -i "s/$rtitle/$title/g" $newpost
 	sed -i "s/$rdate/'$now'/g" $newpost
 	sed -i "s/$rbadges/$badges/g" $newpost
+	vim $newpost
 }
 
 case "$1" in
