@@ -1,0 +1,38 @@
+#!/bin/bash
+# Simple tool script to run a TnexBlog
+# Made by Tnex himself.
+
+dir="$(pwd)"
+post="$dir/post.md"
+blogdir="$HOME/blog"
+
+# Replacement variables
+rtitle="##TITLE"
+rdate="##DATE"
+rbadges="##BADGES"
+
+
+newpost() {
+	read -erp "De um titulo ao seu post
+	" title
+	read -erp "Adicione as badges (separado por ",")
+	" badges
+	badges="$(echo "$badges" | tr -d ' ')"
+	badges=$(sed 's/[a-zA-Z0-9]*/"&"/g' <<< $badges)
+	echo "$title" | grep "\"" >/dev/null && printf "Double quotation marks (\") are not allowed in entry titles.\\n" && exit
+	url="$(echo "$title" | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+	title="$(echo "$title" | tr -d '\n')"
+	mkdir $blogdir/content/blog/$url
+	newpost="$blogdir/content/blog/$url/index.md"
+	cp $post $newpost
+	now="$(date -Isec)"
+	now="$(sed 's/-[0-9][0-9]:[0-9][0-9]$/.000Z/g' <<< $now)"
+	sed -i "s/$rtitle/$title/g" $newpost
+	sed -i "s/$rdate/'$now'/g" $newpost
+	sed -i "s/$rbadges/$badges/g" $newpost
+}
+
+case "$1" in
+	n*) newpost ;;
+	*) printf "lb blog system by Tnex <ola@tnexblog.com>\\nUsage:\\n  bm n:\\tnew post\\n" ;;
+esac
