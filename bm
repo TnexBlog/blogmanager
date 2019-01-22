@@ -4,6 +4,7 @@
 
 dir="$(pwd)"
 post="$dir/post.md"
+group="$dir/group.json"
 blogdir="$HOME/blog"
 
 # Replacement variables
@@ -33,7 +34,72 @@ newpost() {
 	vim $newpost
 }
 
+newgoalgroup() {
+	read -erp "Qual o nome do grupo?
+	" title
+	echo "$title" | grep "\"" >/dev/null && printf "Double quotation marks (\") are not allowed in entry titles.\\n" && exit
+	filename="$(echo "$title" | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+	filepath="$blogdir/data/goals/$filename.json"
+	cp $group $filepath
+	sed -i "s/$rtitle/$title/g" $filepath
+}
+
+newgoal() {
+	shopt -s nullglob
+	goals=($blogdir/data/goals/*.json)
+	for i in "${!goals[@]}"; do
+		printf "\t%s %s\n" "$i" "${goals[$i]##*/}"
+	done
+	read -erp "Qual grupo (escolha um número)?
+	" group
+	read -erp "Qual o nome?
+	" name
+	read -erp "Qual o valor do objetivo?
+	" goal
+	read -erp "Qual o tipo (money ou weight)?
+	" goaltype
+	read -erp "Qual o valor inicial?
+	" start
+	cat "${goals[$group]}" | jq ".goals=.goals + [{\"name\": \"${name}\", \"goal\": ${goal}, \"type\": \"${goaltype}\", \"start\": ${start}, \"updates\": []}]" > "tmp.json"
+	cp "tmp.json" "${goals[$group]}"
+	rm -f "tmp.json"
+}
+
+newgoalupdate() {
+	shopt -s nullglob
+	goals=($blogdir/data/goals/*.json)
+	for i in "${!goals[@]}"; do
+		printf "\t%s %s\n" "$i" "${goals[$i]##*/}"
+	done
+	read -erp "Qual grupo (escolha um número)?
+	" group
+	cat "${goals[$group]}" | jq '.goals | to_entries'
+	read -erp "Qual goal (escolha um número dentre os keys)?
+	" goal
+	read -erp "Qual o valor?
+	" value
+	now="$(date -Isec)"
+	now="$(sed 's/-[0-9][0-9]:[0-9][0-9]$/.000Z/g' <<< $now)"
+	cat "${goals[$group]}" | jq ".goals[${goal}].updates=.goals[${goal}].updates + [{\"value\": ${value}, \"date\": \"${now}\"}]" > "tmp.json"
+	cp "tmp.json" "${goals[$group]}"
+	rm -f "tmp.json"
+}
+
+run() {
+	rungatsby
+}
+
 case "$1" in
-	n*) newpost ;;
-	*) printf "lb blog system by Tnex <ola@tnexblog.com>\\nUsage:\\n  bm n:\\tnew post\\n" ;;
+	p*) newpost ;;
+	r*) run ;;
+	g*) newgoalgroup ;;
+	n*) newgoal ;;
+	u*) newgoalupdate ;;
+	*) printf "bm blog manager by Tnex <ola@tnexblog.com>
+		Usage:
+		bm r:	run dev
+		bm p:	new post
+		bm g:	new goal group
+		bm n:	new goal
+		bm u:	new goal update\\n" ;;
 esac
