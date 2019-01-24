@@ -2,7 +2,7 @@
 # Simple tool script to run the TnexBlog
 # Made by Tnex himself.
 
-dir="$(pwd)"
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 post="$dir/post.md"
 group="$dir/group.json"
 blogdir="$HOME/blog"
