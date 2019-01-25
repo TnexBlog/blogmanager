@@ -2,6 +2,7 @@ Tnex Blog Manager
 =================
 
 Running today on: [tnexblog.com](http://tnexblog.com)
+
 Heavily inspired by: [LARBS Blog Script](https://github.com/LukeSmithxyz/lb)
 
 I will not update here the usage, it is just an easy way to create blog posts
